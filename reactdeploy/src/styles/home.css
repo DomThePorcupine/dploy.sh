@@ -1,0 +1,22 @@
+.large-text {
+  font-size: 50px !important;
+  padding-left: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  flex-basis: 50%;
+  float: left;
+  padding-right: 10px;
+}
+.home {
+  display: flex;
+  flex-wrap: wrap;
+}
+.col {
+  flex-basis: 20%;
+  position: relative;
+  top: 60%;
+  transform: translateY(-50%);
+}
+.small-text {
+  font-size: 35px;
+}
