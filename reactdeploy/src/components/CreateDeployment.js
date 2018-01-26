@@ -25,7 +25,7 @@ class CreateDeployment extends Component {
   createNewDeployment = () => {
     this.setState({'isActive': true})
     const { name, git_url, dir, cont_port, local_port } = this.state
-    axios.post('http://127.0.0.1:8000/deployments/', {
+    axios.post('http://api.dploy.sh.doms.land/deployments/', {
       name: name,
       git: git_url,
       dir: dir,

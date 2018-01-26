@@ -11,7 +11,7 @@ class Home extends Component {
   state = {'deployments': [], 'isActive': false }
   componentDidMount() {
     
-    axios.get('http://127.0.0.1:8000/deployments/', {withCredentials: true}).then(response => {
+    axios.get('http://api.dploy.sh.doms.land/deployments/', {withCredentials: true}).then(response => {
       this.setState({'deployments': JSON.parse(response.data)})
       this.setState({'isActive':false})
     }, error => {

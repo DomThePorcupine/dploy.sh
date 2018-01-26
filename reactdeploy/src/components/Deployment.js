@@ -10,7 +10,7 @@ var axios = require('axios')
 class Depoyment extends Component {
   state = {'deployment': {}, isActive: false, running: false, message: '' }
   componentDidMount() {
-    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
+    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
       var ndep = JSON.parse(response.data)[0]
       console.log(ndep.fields)
       this.setState({'deployment': ndep.fields})
@@ -21,7 +21,7 @@ class Depoyment extends Component {
   startContainer = () => {
     this.setState({'message': 'Starting container...'})
     this.setState({'isActive': true})
-    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id + '/start/', {withCredentials: true}).then(response => {
+    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/start/', {withCredentials: true}).then(response => {
       console.log(response.data)
       var res = response.data
       if (res.message === 'success') {
@@ -36,7 +36,7 @@ class Depoyment extends Component {
   stopContainer = () => {
     this.setState({'message': 'Stoping container...'})
     this.setState({'isActive': true})
-    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id + '/stop/', {withCredentials: true}).then(response => {
+    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/stop/', {withCredentials: true}).then(response => {
       console.log(response.data)
       var res = response.data
       if (res.message === 'success') {
@@ -49,12 +49,12 @@ class Depoyment extends Component {
   buildContainer = () => {
     this.setState({'message': 'Building container...'})
     this.setState({'isActive': true})
-    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id + '/build/', {withCredentials: true}).then(response => {
+    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/build/', {withCredentials: true}).then(response => {
       this.setState({'isActive': false})
     })
   }
   deleteDeployment = () => {
-    axios.delete('http://127.0.0.1:8000/deployments/' + this.props.match.params.id + '/delete/', {withCredentials: true}).then(response => {
+    axios.delete('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/delete/', {withCredentials: true}).then(response => {
       this.props.history.push('/')
     })
   }
