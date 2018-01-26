@@ -13,7 +13,7 @@ class Login extends Component {
     this.setState({'isActive': true})
     const { name, pass } = this.state
 
-    axios.post('http://api.dploy.sh.doms.land/login/', {username:name,password:pass}, {withCredentials: true}).then(response => {
+    axios.post('http://api.dploy.sh.doms.land/login/', JSON.stringify({username:name,password:pass}), {withCredentials: true}).then(response => {
       if(response.data.message === 'success') {
         this.props.history.push('/')
         return
