@@ -20,3 +20,13 @@
 .small-text {
   font-size: 35px;
 }
+
+.notification {
+  padding-left: 20px;
+  float: right;
+  padding-top: 10px;
+  
+}
+.hidden {
+  display: none !important;
+}

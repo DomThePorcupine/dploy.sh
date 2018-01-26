@@ -9,10 +9,18 @@ var axios = require('axios')
 
 
 class CreateDeployment extends Component {
-  state = { name: '', git_url: '', dir: '', cont_port: '', local_port: '', isActive: false }
+  state = { name: '', git_url: '', dir: '', cont_port: '', 
+            local_port: '', isActive: false, 
+            message:'Creating Deployment, please wait...',
+            bad_git: false, m_header: 'Just one second' }
 
   // Update fields
-  handleChange = (e, { name, value }) => this.setState({ [name]: value })
+  handleChange = (e, { name, value }) => {
+    if(name === 'git_url') {
+      this.setState({'bad_git': false })
+    }
+    this.setState({ [name]: value })
+  }
 
   createNewDeployment = () => {
     this.setState({'isActive': true})
@@ -28,21 +36,27 @@ class CreateDeployment extends Component {
       // Redirect to the details page
       this.setState({'isActive': false})
       this.props.history.push('/deployment/' + response.data.id)
-    }, response => {
-      // Handle the error in some way
+    }, error => {
+      this.setState({'m_header': 'ERROR.'})
+      this.setState({'message': error.response.data.message})
+      if(error.response.data.reason === 'bad_git_url') {
+        this.setState({'bad_git': true})
+      }
+      // Finally turn off the error after 2 seconds
+      setTimeout(function(){this.setState({'isActive': false})}.bind(this),2000)
     })
   }
 
   render() {
-    const { name, git_url, dir, cont_port, local_port, isActive } = this.state
+    const { name, git_url, dir, cont_port, local_port, message, m_header } = this.state
     return (
       
       <div className="createDeployment">
       <Message icon className={this.state.isActive ? '' : 'hidden'}>
           <Icon name='circle notched' loading />
           <Message.Content>
-            <Message.Header>Just one second</Message.Header>
-            Creating Deployment, please wait...
+            <Message.Header>{m_header}</Message.Header>
+            {message}
           </Message.Content>
         </Message>
       <h1>Create your next deployment! :D</h1>
@@ -52,7 +66,7 @@ class CreateDeployment extends Component {
           <Grid.Row stretched>
           <Grid.Column>
             <Segment><Form.Input className="box" placeholder='Name' name='name' value={name} onChange={this.handleChange}/></Segment>
-            <Segment><Form.Input className="box" placeholder='Git Url' name='git_url' value={git_url} onChange={this.handleChange}/></Segment>
+            <Segment color={this.state.bad_git ? 'red' : ''}><Form.Input className="box" placeholder='Git Url' name='git_url' value={git_url} onChange={this.handleChange}/></Segment>
           </Grid.Column>
           <Grid.Column>
             <Segment><Form.Input className="box" placeholder='Directory' name='dir' value={dir} onChange={this.handleChange}/></Segment>
