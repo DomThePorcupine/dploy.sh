@@ -10,7 +10,7 @@ var axios = require('axios')
 class Depoyment extends Component {
   state = {'deployment': {}, isActive: false, running: false, message: '' }
   componentDidMount() {
-    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id, {withCredentials: true}).then(response => {
+    axios.get('http://127.0.0.1:8000/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
       var ndep = JSON.parse(response.data)[0]
       console.log(ndep.fields)
       this.setState({'deployment': ndep.fields})

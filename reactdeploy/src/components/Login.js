@@ -3,6 +3,9 @@ import { Form, Message, Icon } from 'semantic-ui-react'
 import '../styles/login.css'
 var axios = require('axios')
 
+axios.defaults.xsrfCookieName = 'csrftoken'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+
 class Login extends Component {
   state = { name: '', pass: '', isActive: false, err: 'Trying to log you in.'}
   handleChange = (e, { name, value }) => this.setState({ [name]: value })
