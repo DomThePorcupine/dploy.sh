@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse, HttpResponse
 import json
 
-
 # NOTE there is no way to even attempt to sign up here
 
 
@@ -15,7 +14,7 @@ def userlogin(request):
         return HttpResponse(status=404)
 
     # We know it is a POST request for sure now
-    
+
     try:
         params = json.loads(request.body)
         username = params['username']
@@ -30,4 +29,4 @@ def userlogin(request):
             return JsonResponse({'message': 'failure'}, status=400)
     # In case they haven't actually sent us any valid information
     except Exception as e:
-        return JsonResponse({'message':'Invalid params'},status=400)
+        return JsonResponse({'message': 'Invalid params'}, status=400)
