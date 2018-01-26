@@ -12,10 +12,12 @@ WORKDIR /usr/src/app
 COPY server/package.json .
 COPY server/package-lock.json .
 COPY server/app.js .
-COPY build ./pub
 
 # Install our dependencies
 RUN npm install
+
+# Update our build
+COPY build ./pub
 
 # Open up our port
 EXPOSE 7075
