@@ -20,7 +20,8 @@ class Deployment(models.Model):
     container_port = models.CharField(max_length=5, default='')
     local_port = models.CharField(max_length=5, default='')
     # NOTE we default to master if we are not given a branch
-    git_branch_text = models.CharField(max_length=100,default='master')
+    git_branch_text = models.CharField(max_length=100, default='master')
+    domain_text = models.CharField(max_length=200, default='')
 
     def __str__(self):
         return self.name_text
