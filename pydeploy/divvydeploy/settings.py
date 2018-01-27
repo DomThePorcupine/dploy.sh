@@ -27,13 +27,13 @@ DEBUG = True
 CSRF_COOKIE_NAME = "XSRF-TOKEN"
 
 ALLOWED_HOSTS = [
-    'http://api.dploy.sh.doms.land',
     '127.0.0.1'
 ]
 
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
-    'http://dploy.sh.doms.land'
+    'http://127.0.0.1:3000'
+    #'http://dploy.sh.doms.land'
 )
 
 CORS_ALLOW_CREDENTIALS = True
@@ -56,7 +56,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

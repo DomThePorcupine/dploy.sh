@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 # NOTE there is no way to even attempt to sign up here
-
+# NOTE we need this to be exempt because they have to get a cookie
 @csrf_exempt
 def userlogin(request):
     if request.method == 'OPTIONS':

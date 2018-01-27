@@ -13,16 +13,13 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 
-# Docker imports
-from docker import APIClient
-import docker
-
 # Git imports
 from pygit2 import clone_repository, GitError
 
 # Helper imports
 from deploy.helpers import *
 
+import requests
 from .models import Deployment
 
 
@@ -152,7 +149,6 @@ def webhooks(request, deployment_hash):
     except ObjectDoesNotExist as e:
         return JsonResponse({'message': 'not found'}, status=404)
 
-
 ####################################################################################
 # Method for STARTING containers
 ####################################################################################
@@ -175,8 +171,11 @@ def start(requset, deployment_id):
             # update the container id so that it is easier to
             # stop it
             dep.container_id_text = start_container(dep)
+        except requests.exceptions.ConnectionError:
+            return JsonResponse({'message': 'Error starting container. Couldn\'t connect to the docker daemon. Is docker running?'}, status=500)
         except Exception as e:
             print(e)
+            print(e.__class__.__name__)
             return JsonResponse({'message': 'Error starting container'}, status=500)
         # Okay now update the running var
         dep.is_running = True
