@@ -1,9 +1,13 @@
 import React, { Component } from 'react'
 import { Form, Message, Icon } from 'semantic-ui-react'
 import '../styles/login.css'
-var axios = require('axios')
 
-axios.defaults.xsrfCookieName = 'csrftoken'
+// Get our API url
+import { API } from './api'
+
+import axios from 'axios'
+
+axios.defaults.xsrfCookieName = 'XSRF-TOKEN'
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class Login extends Component {
@@ -13,7 +17,7 @@ class Login extends Component {
     this.setState({'isActive': true})
     const { name, pass } = this.state
 
-    axios.post('http://api.dploy.sh.doms.land/login/', JSON.stringify({username:name,password:pass}), {withCredentials: true}).then(response => {
+    axios.post(API + '/login/', JSON.stringify({username:name,password:pass}), {withCredentials: true}).then(response => {
       if(response.data.message === 'success') {
         this.props.history.push('/')
         return

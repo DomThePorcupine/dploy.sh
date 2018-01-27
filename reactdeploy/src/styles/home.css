@@ -30,3 +30,7 @@
 .hidden {
   display: none !important;
 }
+.sad {
+  font-size: 50px;
+  padding-left: 25px;
+}

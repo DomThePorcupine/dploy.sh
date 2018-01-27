@@ -4,15 +4,20 @@ import { Button, Message, Icon, Label } from 'semantic-ui-react';
 // Import our custom css
 import '../styles/dep.css'
 
+// Get our API url
+import { API } from './api'
 
-var axios = require('axios')
+import axios from 'axios'
+
+axios.defaults.xsrfCookieName = 'XSRF-TOKEN'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class Depoyment extends Component {
+  
   state = {'deployment': {}, isActive: false, running: false, message: '' }
   componentDidMount() {
-    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
+    axios.get(API + '/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
       var ndep = JSON.parse(response.data)[0]
-      console.log(ndep.fields)
       this.setState({'deployment': ndep.fields})
       this.setState({'running': this.state.deployment.is_running})
     })
@@ -21,23 +26,27 @@ class Depoyment extends Component {
   startContainer = () => {
     this.setState({'message': 'Starting container...'})
     this.setState({'isActive': true})
-    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/start/', {withCredentials: true}).then(response => {
-      console.log(response.data)
+    axios.get(API + '/deployments/' + this.props.match.params.id + '/start/', {withCredentials: true}).then(response => {
       var res = response.data
       if (res.message === 'success') {
         this.setState({'running': true})
       }
       this.setState({'isActive': false})
-    }, response => {
-      console.log(response)
+    }, error => {
+      setTimeout(function(){
+        this.setState({'message': error.response.data.message})
+      }.bind(this), 1000)
+      
+      setTimeout(function(){
+        this.setState({'isActive': false})
+      }.bind(this), 4000)
     })
   }
 
   stopContainer = () => {
     this.setState({'message': 'Stoping container...'})
     this.setState({'isActive': true})
-    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/stop/', {withCredentials: true}).then(response => {
-      console.log(response.data)
+    axios.get(API + '/deployments/' + this.props.match.params.id + '/stop/', {withCredentials: true}).then(response => {
       var res = response.data
       if (res.message === 'success') {
         this.setState({'running': false})
@@ -49,12 +58,12 @@ class Depoyment extends Component {
   buildContainer = () => {
     this.setState({'message': 'Building container...'})
     this.setState({'isActive': true})
-    axios.get('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/build/', {withCredentials: true}).then(response => {
+    axios.get(API + '/deployments/' + this.props.match.params.id + '/build/', {withCredentials: true}).then(response => {
       this.setState({'isActive': false})
     })
   }
   deleteDeployment = () => {
-    axios.delete('http://api.dploy.sh.doms.land/deployments/' + this.props.match.params.id + '/delete/', {withCredentials: true}).then(response => {
+    axios.delete(API + '/deployments/' + this.props.match.params.id + '/delete/', {withCredentials: true}).then(response => {
       this.props.history.push('/')
     })
   }
@@ -62,7 +71,7 @@ class Depoyment extends Component {
   testWebhook = () => {
     this.setState({'message': 'Testing webhook...'})
     this.setState({'isActive': true})
-    axios.post('https://127.0.0.1:8000/webhooks/' + this.state.deployment.webhook_text + '/', {withCredentials: true}).then(response => {
+    axios.post(API + '/webhooks/' + this.state.deployment.webhook_text + '/', {withCredentials: true}).then(response => {
       this.setState({'isActive': false})
     })
   }

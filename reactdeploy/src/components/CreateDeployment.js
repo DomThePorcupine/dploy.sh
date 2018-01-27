@@ -5,7 +5,10 @@ import { Form, Grid, Segment, Message, Icon } from 'semantic-ui-react'
 import '../styles/cdeps.css'
 
 // Need the axios lib for making a post reqest
-var axios = require('axios')
+import axios from 'axios'
+
+axios.defaults.xsrfCookieName = 'XSRF-TOKEN'
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 
 class CreateDeployment extends Component {
