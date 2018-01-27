@@ -21,11 +21,11 @@ from deploy.helpers import *
 
 import requests
 from .models import Deployment
-
+from django.views.decorators.csrf import csrf_exempt
 
 SUPER_SECRET_KEY = 'uokqerudduheulkieuheuqeruh'
 
-
+@csrf_exempt
 def index(request):
     """
     This method will return all deployments when
@@ -117,6 +117,7 @@ def detail(request, deployment_id):
 ####################################################################################
 # Method for handling webhooks
 ####################################################################################
+@csrf_exempt
 def webhooks(request, deployment_hash):
     """
     Given a deployment hash, find the deployment
