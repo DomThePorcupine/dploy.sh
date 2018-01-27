@@ -45,7 +45,7 @@ def index(request):
             safe=False)
     elif request.method == 'POST':
         try:
-            params = json.loads(request.body)
+            params = json.loads(request.body.decode('utf-8'))
             name = params['name']
             git = params['git']
             dirt = params['dir']
