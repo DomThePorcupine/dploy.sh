@@ -22,10 +22,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '2nfy4k(o!24p@cf5atmfw9x+#1f#x&nxmpnt4$u_e^36*$l*f-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+
+CSRF_COOKIE_NAME = "XSRF-TOKEN"
 
 ALLOWED_HOSTS = [
-    'http://api.dploy.sh.doms.land'
+    'http://api.dploy.sh.doms.land',
+    '127.0.0.1'
 ]
 
 # CORS_ORIGIN_ALLOW_ALL = True
@@ -132,5 +135,5 @@ STATIC_URL = '/static/'
 
 X_FRAME_OPTIONS = 'DENY'
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
