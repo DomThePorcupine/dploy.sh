@@ -28,4 +28,4 @@ get you all set up with deps and the likes.
 
 ## Want to see what it looks like? (this should be update often)
 
-![view](https://raw.githubusercontent.com/DomThePorcupine/dploy.sh/master/examples/viewscreenshot.png)
+![](examples/viewscreenshot.png)
