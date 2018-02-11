@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Message, Icon, Label } from 'semantic-ui-react';
+import { Button, Message, Icon, Label, Modal, Header } from 'semantic-ui-react';
 
 // Import our custom css
 import '../styles/dep.css'
@@ -14,12 +14,24 @@ axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 
 class Depoyment extends Component {
   
-  state = {'deployment': {}, isActive: false, running: false, message: '' }
+  state = {openmodal: false, key: '', 'deployment': {}, isActive: false, running: false, message: '',  }
+
   componentDidMount() {
     axios.get(API + '/deployments/' + this.props.match.params.id +'/', {withCredentials: true}).then(response => {
       var ndep = JSON.parse(response.data)[0]
       this.setState({'deployment': ndep.fields})
       this.setState({'running': this.state.deployment.is_running})
+    })
+  }
+
+  fetchKey = () => {
+    
+    axios.get(API + '/deployments/' + this.props.match.params.id + '/key/', {withCredentials: true}).then(response => {
+      var res = response.data
+      this.setState({'key': res.ssh_key})
+      this.setState({'openmodal': true})
+    }, error => {
+      // Do something
     })
   }
 
@@ -76,10 +88,23 @@ class Depoyment extends Component {
     })
   }
 
+  close = () => this.setState({ openmodal: false })
+
   render() {
-    const { deployment, running, message } = this.state
+    const { openmodal, deployment, running, message, key } = this.state
     return (
       <div className="deployment">
+        <Modal open={openmodal} basic>
+          <Header icon='lock' content='Paste this key into github' />
+          <Modal.Content>
+            <div className="sshkey">{key}</div>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button color='green' onClick={this.close}>
+              <Icon name='checkmark' /> Done
+            </Button>
+          </Modal.Actions>
+        </Modal>
         <Message icon className={this.state.isActive ? '' : 'hidden'}>
           <Icon name='circle notched' loading />
           <Message.Content>
@@ -99,6 +124,7 @@ class Depoyment extends Component {
         <Button className="btn" color="blue" onClick={this.buildContainer}>Build</Button>
         </h3>
         <h3>Webhook URL: /webhooks/{deployment.webhook_text}/<Button onClick={this.testWebhook} className="btn" color="blue">Test</Button></h3>
+        <Button onClick={this.fetchKey} >Show ssh-key</Button>
       </div>
     );
   }

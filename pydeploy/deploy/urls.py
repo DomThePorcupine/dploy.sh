@@ -16,5 +16,6 @@ urlpatterns = [
     path(
         'deployments/<int:deployment_id>/delete/', views.delete,
         name='delete'),
+    path('deployments/<int:deployment_id>/key/', views.get_rsa_pub, name='key'),
     path('webhooks/<slug:deployment_hash>/', views.webhooks, name='webhook')
 ]

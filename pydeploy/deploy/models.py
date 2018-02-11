@@ -22,6 +22,7 @@ class Deployment(models.Model):
     # NOTE we default to master if we are not given a branch
     git_branch_text = models.CharField(max_length=100, default='master')
     domain_text = models.CharField(max_length=200, default='')
+    is_compose = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name_text

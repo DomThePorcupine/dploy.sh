@@ -22,6 +22,7 @@ from deploy.helpers import *
 import requests
 from .models import Deployment
 from django.views.decorators.csrf import csrf_exempt
+from subprocess import call
 
 SUPER_SECRET_KEY = 'uokqerudduheulkieuheuqeruh'
 
@@ -53,6 +54,7 @@ def index(request):
         cport = params['cport']
         lport = params['lport']
         create_new_key = params['gen_new_key']
+        compose = params['compose']
 
         
 
@@ -61,7 +63,11 @@ def index(request):
         # Make sure we have a valid git name
         if git_name == '':
             return JsonResponse({'message': 'invalid git url', 'reason': 'bad_git_url'}, status=400)
-
+        
+        # Replace copied ssh with proper ssh
+        #if "git@github.com" in git:
+        #    git = "ssh://" + git
+        
         # append our repo name to our dir name
         if dirt.endswith('/'):
             dirt = dirt + git_name
@@ -91,7 +97,8 @@ def index(request):
             is_running=run,
             webhook_text=webhook.hexdigest(),
             container_port=cport,
-            local_port=lport)
+            local_port=lport,
+            is_compose=compose)
 
         return JsonResponse({'message': 'success', 'id': d.id})
 
@@ -175,16 +182,21 @@ def start(requset, deployment_id):
         if dep.is_running:
             return JsonResponse({'message': 'already running'}, status=202)
         # Try to start the container
-        try:
-            # update the container id so that it is easier to
-            # stop it
-            dep.container_id_text = start_container(dep)
-        except requests.exceptions.ConnectionError:
-            return JsonResponse({'message': 'Error starting container. Couldn\'t connect to the docker daemon. Is docker running?'}, status=500)
-        except Exception as e:
-            print(e)
-            print(e.__class__.__name__)
-            return JsonResponse({'message': 'Error starting container'}, status=500)
+        if dep.is_compose:
+            call(['docker-compose',
+                    'up', '-d'],
+                    shell=True, cwd=dep.dir_text)
+        else:
+            try:
+                # update the container id so that it is easier to
+                # stop it
+                dep.container_id_text = start_container(dep)
+            except requests.exceptions.ConnectionError:
+                return JsonResponse({'message': 'Error starting container. Couldn\'t connect to the docker daemon. Is docker running?'}, status=500)
+            except Exception as e:
+                print(e)
+                print(e.__class__.__name__)
+                return JsonResponse({'message': 'Error starting container'}, status=500)
         # Okay now update the running var
         dep.is_running = True
         dep.save()
@@ -213,15 +225,23 @@ def stop(request, deployment_id):
         # querying for results
         if not dep.is_running:
             return JsonResponse({'message': 'not running'}, status=202)
-        try:
-            stop_container(dep.container_id_text)
-        except Exception as e:
-            print(e)
-            print(e.__class__.__name__)
-            return JsonResponse(
-                {
-                    'message': 'error stopping container'
-                }, status=500)
+        # Okay so we are __probably running, check if this is
+        # a compose project or not
+        if dep.is_compose:
+            call(['docker-compose',
+                    'down'],
+                    shell=True, cwd=dep.dir_text)
+
+        else:
+            try:
+                stop_container(dep.container_id_text)
+            except Exception as e:
+                print(e)
+                print(e.__class__.__name__)
+                return JsonResponse(
+                    {
+                        'message': 'error stopping container'
+                    }, status=500)
         # Okay now update the running var
         # and set our container id back to
         # nothing
@@ -250,6 +270,24 @@ def build(request, deployment_id):
     try:
         # Pull out our dep
         dep = Deployment.objects.get(pk=deployment_id)
+        # Check to make sure our repo has been cloned
+        if not os.path.exists(dep.dir_text):
+            # We need to clone first, ususally happens
+            # when you have to generate a private key
+            # first
+            keypath = ''
+            if dep.dir_text.endswith('/'):
+                keypath = dep.dir_text[:-1] + "_keys/"
+            else:
+                keypath = dep.dir_text + "_keys/"
+
+            key_pub = os.path.expanduser(keypath + 'id_rsa.pub')
+            key_priv = os.path.expanduser(keypath + 'id_rsa')
+
+            keypair = pygit2.Keypair("git", key_pub, key_priv, None)
+            callbacks = pygit2.RemoteCallbacks(credentials=keypair)
+            clone_repository(dep.git_url_text, dep.dir_text, callbacks=callbacks)
+
         # Use our helper function to build our container
         build_container(dep.dir_text, dep.name_text)
         return JsonResponse({'message': 'success'})
@@ -292,7 +330,17 @@ def get_rsa_pub(request, deployment_id):
     # Get the deployment so we can get the path url
     try:
         dep = Deployment.objects.get(pk=deployment_id)
+        # Check if the folder exists, if not we know
+        # this deployment has no key
+        direct = ""
+        if dep.dir_text.endswith('/'):
+            direct = dep.dir_text[:-1] + "_keys/"
+        else:
+            direct = dep.dir_text + "_keys/"
+
+        if not os.path.exists(direct):
+            return JsonResponse({'ssh_key': 'No key found for this deployment.'})
         key = read_ssh_key(dep.dir_text)
-        return JsonResponse({'ssh-key': key})
+        return JsonResponse({'ssh_key': key})
     except ObjectDoesNotExist:
         return JsonResponse({'message': 'not found'}, status=404)

@@ -15,3 +15,6 @@ h1 {
 .h3 {
   padding-top: 15px;
 }
+.sshkey {
+  word-wrap: break-word;
+}
