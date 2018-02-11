@@ -8,7 +8,7 @@ import '../styles/home.css'
 // Get our API url
 import { API } from './api'
 
-var axios = require('axios')
+import axios from 'axios'
 
 class Home extends Component {
   state = {'deployments': [], 'isActive': false, 'isSad': false }
@@ -16,7 +16,6 @@ class Home extends Component {
     axios.get(API + '/deployments/', {withCredentials: true}).then(response => {
       
       if(JSON.parse(response.data).length === 0) {
-        console.log('tre')
         this.setState({'isSad': true})
       }
       this.setState({'deployments': JSON.parse(response.data)})

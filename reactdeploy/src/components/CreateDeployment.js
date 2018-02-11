@@ -4,6 +4,8 @@ import { Form, Grid, Segment, Message, Icon } from 'semantic-ui-react'
 // Grab our custom css
 import '../styles/cdeps.css'
 
+import { API } from './api'
+
 // Need the axios lib for making a post reqest
 import axios from 'axios'
 
@@ -28,7 +30,7 @@ class CreateDeployment extends Component {
   createNewDeployment = () => {
     this.setState({'isActive': true})
     const { name, git_url, dir, cont_port, local_port } = this.state
-    axios.post('http://api.dploy.sh.doms.land/deployments/', {
+    axios.post(API + '/deployments/', {
       name: name,
       git: git_url,
       dir: dir,
@@ -41,6 +43,7 @@ class CreateDeployment extends Component {
       this.props.history.push('/deployment/' + response.data.id)
     }, error => {
       this.setState({'m_header': 'ERROR.'})
+      console.log(error)
       this.setState({'message': error.response.data.message})
       if(error.response.data.reason === 'bad_git_url') {
         this.setState({'bad_git': true})
