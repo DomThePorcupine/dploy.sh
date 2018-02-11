@@ -44,54 +44,61 @@ def index(request):
             serializers.serialize("json", Deployment.objects.all()),
             safe=False)
     elif request.method == 'POST':
-        try:
-            params = json.loads(request.body.decode('utf-8'))
-            name = params['name']
-            git = params['git']
-            dirt = params['dir']
-            run = params['run']
-            cport = params['cport']
-            lport = params['lport']
+        #try:
+        params = json.loads(request.body.decode('utf-8'))
+        name = params['name']
+        git = params['git']
+        dirt = params['dir']
+        run = params['run']
+        cport = params['cport']
+        lport = params['lport']
+        create_new_key = params['gen_new_key']
 
-            git_name = parse_git_url(git)
-            
-            # Make sure we have a valid git name
-            if git_name == '':
-                return JsonResponse({'message': 'invalid git url', 'reason': 'bad_git_url'}, status=400)
+        
 
-            # append our repo name to our dir name
-            if dirt.endswith('/'):
-                dirt = dirt + git_name
-            else:
-                dirt = dirt + '/' + git_name
+        git_name = parse_git_url(git)
+        
+        # Make sure we have a valid git name
+        if git_name == '':
+            return JsonResponse({'message': 'invalid git url', 'reason': 'bad_git_url'}, status=400)
 
+        # append our repo name to our dir name
+        if dirt.endswith('/'):
+            dirt = dirt + git_name
+        else:
+            dirt = dirt + '/' + git_name
+
+        # awesome, now lets create our custom url
+        webhook = hashlib.md5((params['name'] + SUPER_SECRET_KEY).encode())
+
+        # First see if we need to generate an ssh key
+        # If we do we cannot pull automatically
+        if create_new_key:
+            generate_ssh_key(dirt)
+        else:
             # Let's try to clone our repo
             try:
                 clone_repository(git, dirt)
             except GitError:
                 return JsonResponse({'message': 'invalid git url', 'reason': 'bad_git_url'}, status=400)
             except ValueError:
-                #print(e.__class__.__name__)
                 return JsonResponse({'message': 'invalid directory, perhaps the destination folder exists?', 'reason': 'bad_dir'}, status=400)
 
-            # awesome, now lets create our custom url
-            webhook = hashlib.md5((params['name'] + SUPER_SECRET_KEY).encode())
+        d = Deployment.objects.create(
+            name_text=name,
+            git_url_text=git,
+            dir_text=dirt,
+            is_running=run,
+            webhook_text=webhook.hexdigest(),
+            container_port=cport,
+            local_port=lport)
 
-            d = Deployment.objects.create(
-                name_text=name,
-                git_url_text=git,
-                dir_text=dirt,
-                is_running=run,
-                webhook_text=webhook.hexdigest(),
-                container_port=cport,
-                local_port=lport)
+        return JsonResponse({'message': 'success', 'id': d.id})
 
-            return JsonResponse({'message': 'success', 'id': d.id})
-
-        except Exception as e:
+        '''except Exception as e:
             print(e)
             print(e.__class__.__name__)
-            return JsonResponse({'message': 'Invalid params'}, status=400)
+            return JsonResponse({'message': 'Invalid params'}, status=400)'''
 
     else:
         return JsonResponse({'message': 'Unknown method'}, status=404)
@@ -274,4 +281,18 @@ def delete(request, deployment_id):
         dep.delete()
         return JsonResponse({'message': 'success'})
     except ObjectDoesNotExist:
-        return JsonResponse({'message': 'not found'})
+        return JsonResponse({'message': 'not found'}, status=404)
+
+####################################################################################
+# Method for deleting deployments
+####################################################################################
+def get_rsa_pub(request, deployment_id):
+    if request.method != 'GET':
+        return JsonResponse({'message': 'not found'}, status=404)
+    # Get the deployment so we can get the path url
+    try:
+        dep = Deployment.objects.get(pk=deployment_id)
+        key = read_ssh_key(dep.dir_text)
+        return JsonResponse({'ssh-key': key})
+    except ObjectDoesNotExist:
+        return JsonResponse({'message': 'not found'}, status=404)

@@ -12,6 +12,10 @@ import docker
 from pygit2 import discover_repository, Repository
 import pygit2
 
+# import Crypto for unique ssh key generation
+from Crypto.PublicKey import RSA
+import os
+
 def parse_git_url(the_url):
     """"
     This method takes a string of an entire
@@ -117,3 +121,39 @@ def pull_repo(repo_path, repo_branch):
                                             [repo.head.target, remote_master_id])
                 # We need to do this or git CLI will think we are still merging.
                 repo.state_cleanup()
+#############################################################
+#############################################################
+def generate_ssh_key(repo_path):
+    '''ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -N '' -C "foo@bar.com"'''
+    key = RSA.generate(4096)
+    # Make our directory for keys
+    direct = ""
+    if repo_path.endswith('/'):
+        direct = repo_path[:-1] + "_keys/"
+    else:
+        direct = repo_path + "_keys/"
+
+    if not os.path.exists(direct):
+        os.makedirs(direct)
+    
+    f = open(direct + "id_rsa", "wb")
+    f.write(key.exportKey('PEM'))
+    f.close()
+
+    pubkey = key.publickey()
+    f = open(direct + "id_rsa.pub", "wb")
+    f.write(pubkey.exportKey('OpenSSH'))
+    f.close()
+
+#############################################################
+#############################################################
+def read_ssh_key(repo_path):
+    data = ''
+    direct = ''
+    if repo_path.endswith('/'):
+        direct = repo_path[:-1] + "_keys/"
+    else:
+        direct = repo_path + "_keys/"
+    with open (direct + "id_rsa.pub", "r") as rsa_pub_file:
+        data = rsa_pub_file.read()
+    return data.rstrip()

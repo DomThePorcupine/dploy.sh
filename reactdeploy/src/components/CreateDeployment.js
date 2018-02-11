@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Grid, Segment, Message, Icon } from 'semantic-ui-react'
+import { Form, Grid, Segment, Message, Icon, Checkbox } from 'semantic-ui-react'
 
 // Grab our custom css
 import '../styles/cdeps.css'
@@ -17,8 +17,10 @@ class CreateDeployment extends Component {
   state = { name: '', git_url: '', dir: '', cont_port: '', 
             local_port: '', isActive: false, 
             message:'Creating Deployment, please wait...',
-            bad_git: false, m_header: 'Just one second' }
-
+            bad_git: false, m_header: 'Just one second',
+            gen_new_key:false }
+            
+  toggle = () => this.setState({ gen_new_key: !this.state.gen_new_key })
   // Update fields
   handleChange = (e, { name, value }) => {
     if(name === 'git_url') {
@@ -29,14 +31,15 @@ class CreateDeployment extends Component {
 
   createNewDeployment = () => {
     this.setState({'isActive': true})
-    const { name, git_url, dir, cont_port, local_port } = this.state
+    const { name, git_url, dir, cont_port, local_port, gen_new_key } = this.state
     axios.post(API + '/deployments/', {
       name: name,
       git: git_url,
       dir: dir,
       run: false,
       cport: cont_port,
-      lport: local_port
+      lport: local_port,
+      gen_new_key: gen_new_key
     }, {withCredentials: true}).then(response => {
       // Redirect to the details page
       this.setState({'isActive': false})
@@ -73,6 +76,7 @@ class CreateDeployment extends Component {
           <Grid.Column>
             <Segment><Form.Input className="box" placeholder='Name' name='name' value={name} onChange={this.handleChange}/></Segment>
             <Segment color={this.state.bad_git ? 'red' : ''}><Form.Input className="box" placeholder='Git Url' name='git_url' value={git_url} onChange={this.handleChange}/></Segment>
+            <Segment><Checkbox toggle label='Generate deploy key?' onChange={this.toggle} checked={this.state.gen_new_key} /></Segment>
           </Grid.Column>
           <Grid.Column>
             <Segment><Form.Input className="box" placeholder='Directory' name='dir' value={dir} onChange={this.handleChange}/></Segment>
