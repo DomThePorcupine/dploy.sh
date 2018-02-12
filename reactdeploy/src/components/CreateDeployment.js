@@ -81,19 +81,16 @@ class CreateDeployment extends Component {
             <Segment><Checkbox toggle label='Generate deploy key?' onChange={this.toggle} checked={this.state.gen_new_key} /></Segment>
           </Grid.Column>
           <Grid.Column>
-            <Segment><Form.Input className="box" placeholder='Directory' name='dir' value={dir} onChange={this.handleChange}/></Segment>
-            <Segment><Form.Input className="box" placeholder='Container Port' name='cont_port' value={cont_port} onChange={this.handleChange}/></Segment>
             <Segment><Checkbox toggle label='Compose deployment?' onChange={this.toggleCompose} checked={this.state.compose} /></Segment>
+            <Segment className={!this.state.compose ? '' : 'hidden'}><Form.Input className="box" placeholder='Container Port' name='cont_port' value={cont_port} onChange={this.handleChange}/></Segment>
+            <Segment className={!this.state.compose ? '' : 'hidden'}><Form.Input className="box" placeholder='Local Port' name='local_port' value={local_port} onChange={this.handleChange}/></Segment>
           </Grid.Column>
           <Grid.Column>
-            <Segment><Form.Input className="box" placeholder='Local Port' name='local_port' value={local_port} onChange={this.handleChange}/></Segment>
+            <Segment><Form.Input className="box" placeholder='Directory' name='dir' value={dir} onChange={this.handleChange}/></Segment>
             <Segment><Form.Button className="submit" content='Submit' /></Segment>
-            
           </Grid.Column>
-          
           </Grid.Row>
-        
-      </Grid>
+        </Grid>
       </Form>
       </div>
     )

@@ -183,9 +183,10 @@ def start(requset, deployment_id):
             return JsonResponse({'message': 'already running'}, status=202)
         # Try to start the container
         if dep.is_compose:
+            print(dep.dir_text)
             call(['docker-compose',
                     'up', '-d'],
-                    shell=True, cwd=dep.dir_text)
+                    cwd=dep.dir_text)
         else:
             try:
                 # update the container id so that it is easier to
@@ -227,11 +228,10 @@ def stop(request, deployment_id):
             return JsonResponse({'message': 'not running'}, status=202)
         # Okay so we are __probably running, check if this is
         # a compose project or not
-        if dep.is_compose:
-            call(['docker-compose',
-                    'down'],
-                    shell=True, cwd=dep.dir_text)
 
+        if dep.is_compose:
+            foo = call(['docker-compose',
+                    'down'],cwd=dep.dir_text)
         else:
             try:
                 stop_container(dep.container_id_text)
